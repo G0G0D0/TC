@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.5.1/pdf.min.js"></script>
+</head>
+<body>
+    <div id="pdf-container"></div>
+
+    <script>
+        const url = 'menu.pdf';
+
+        // Configure PDF.js worker path
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.5.1/pdf.worker.min.js';
+        pdfjsLib.PDFJS.enableWebGL = true; // Enable WebGL (optional)
+        pdfjsLib.PDFJS.disableFontFace = true; // Disable font face (optional)
+        pdfjsLib.PDFJS.disableTextLayer = true; // Disable text layer (optional)
+
+        // Fetch the PDF document
+        pdfjsLib.getDocument(url).promise.then(function (pdf) {
+            // Load the first page
+            pdf.getPage(1).then(function (page) {
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale });
+
+                // Prepare canvas using PDF page dimensions
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                // Render PDF page into canvas context
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext).promise.then(function () {
+                    // Append canvas to the PDF container
+                    const pdfContainer = document.getElementById('pdf-container');
+                    pdfContainer.appendChild(canvas);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
